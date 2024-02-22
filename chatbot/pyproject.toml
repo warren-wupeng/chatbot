@@ -12,6 +12,8 @@ packages = [
 python = "^3.11"
 fastapi = "^0.109.2"
 uvicorn = "^0.27.1"
+requests = "^2.31.0"
+pymongo = {version = "3.11", extras = ["srv"]}
 
 [tool.poetry.scripts]
 chatbot = "chatbot.main:main"
