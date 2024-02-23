@@ -16,7 +16,7 @@ requests = "^2.31.0"
 pymongo = {version = "3.11", extras = ["srv"]}
 
 [tool.poetry.scripts]
-chatbot = "chatbot.main:main"
+chatbot = "chatbot.inbound:main"
 
 [build-system]
 requires = ["poetry-core"]
