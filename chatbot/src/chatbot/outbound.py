@@ -7,10 +7,7 @@ from datetime import datetime
 from chatbot.domain import ChatMessage, Dialog, User, UserChatHistories, UserRepo
 import requests
 
-MONGO_DB_PASSWORD=os.environ.get("MONGO_DB_PASSWORD")
-
-# MONGO_DB_URL=f"mongodb+srv://wupeng0059:{MONGO_DB_PASSWORD}@cluster0.wzekc0u.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-MONGO_DB_URL="mongodb://localhost:27017/"
+MONGO_DB_URL=os.environ.get("MONGO_DB_URL")
 print(MONGO_DB_URL)
 MONGO_CLIENT = pymongo.MongoClient(MONGO_DB_URL)
 
