@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>ChatCoach个人成长教练</h1>
+    <p>我是AI个人成长教练小C</p>
+    <p>我能为你做什么呢?</p>
+    <p>以下是我能做的:</p>
+    <ul>
+        <li>回答你的问题</li>
+        <li>提供信息</li>
+        <li>帮助你处理个人成长中的烦恼</li>
+    </ul>
+    <p>有什么想我可以帮助你的吗?</p>
+
+    <form action="/get-chat-history" method="post">
+        <label for="user_name">你的名字:</label>
+        <input type="text" name="user_name" id="user_name" value="来访者">
+        <br>
+        <input type="submit" value="获取聊天记录">
+    </form>
+    {% if messages %}
+    {% for message in messages %}
+        <div class="message">
+            <p>{{ message.type }}: {{message.text}}</p>
+        </div>
+    {% endfor %}
+    <form action="/send-message" method="post">
+        <input type="hidden" name="user_name" value="{{ user_name }}">
+        <input type="text" name="message" id="message" style="width: 600px;">
+        <input type="submit" value="发送">
+    {% endif %}
+    
+</body>
+</html>

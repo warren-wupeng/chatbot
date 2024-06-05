@@ -8,6 +8,7 @@ services:
     image: chatbot-image
     volumes:
       - ./src:/src
+      - ./templates:/templates
       - ./tests:/tests
     entrypoint:
       - /venv/bin/chatbot

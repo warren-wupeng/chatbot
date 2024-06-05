@@ -86,11 +86,13 @@ class LLM:
 
     def get_chat_completion(self, chat_messages: list[ChatMessage]) -> str:
         messages = self._to_llm_format(chat_messages)
+        # model = "mistralai/mistral-7b-instruct:free"
+        model = "openai/gpt-3.5-turbo"
         response = requests.post(
             url=self.URL,
             headers=self.HEADERS,
             data=json.dumps({
-                "model": "mistralai/mistral-7b-instruct:free",
+                "model": model,
                 "transforms": ["middle-out"],
                 "messages": messages
             })

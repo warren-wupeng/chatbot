@@ -2,14 +2,17 @@ from datetime import datetime
 import json
 from typing import Annotated, Callable
 
-from fastapi import Depends, FastAPI
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from chatbot.domain import AIReply, ChatMessage, Dialog, SystemMessage, User, UserMessage, UserRepo
 from chatbot.outbound import LLM, MONGO_CLIENT, MongoUserRepo
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+
 
 def get_user_repo():
     return MongoUserRepo(MONGO_CLIENT)
@@ -17,9 +20,14 @@ def get_user_repo():
 def get_llm():
     return LLM()
 
-@app.get("/")
-async def health_check():
-    return {"message": "Hello World"}
+@app.get("/", response_class=HTMLResponse)
+async def homepage(request: Request):
+    return templates.TemplateResponse(name='index.html', context={"request": request})
+
+
+
+
+templates = Jinja2Templates(directory="templates")
 
 class ChatResponse(BaseModel):
     response: str
@@ -27,6 +35,49 @@ class ChatResponse(BaseModel):
 class Body(BaseModel):
     message: str
 
+@app.post('/get-chat-history', response_class=HTMLResponse)
+async def form_post(
+    request: Request, 
+    user_repo: Annotated[UserRepo, Depends(get_user_repo)],
+    ):
+    form = await request.form()
+    user_name = form['user_name']
+    if not isinstance(user_name, str):
+        return JSONResponse(status_code=400, content={"message": "Invalid user name"})
+    user = user_repo.get(user_name)
+    # message = form.get('message')
+    # if isinstance(message, str):
+    #     _get_ai_chat_response(user_name, message, user_repo, llm, _gen_ai_reply_coaching
+    # )
+    chat_histories = user.chat_histories.find(last_n=10)
+    messages = [
+        ChatMessageView(type=chat.type, text=chat.text)
+        for chat in chat_histories
+    ]
+    return templates.TemplateResponse(name='index.html', context={"request": request, "user_name": user_name, "messages": messages})
+
+@app.post("/send-message")
+async def send_message(
+    request: Request,
+    user_repo: Annotated[UserRepo, Depends(get_user_repo)],
+    llm: Annotated[LLM, Depends(get_llm)]):
+
+    form = await request.form()
+    user_name = form['user_name']
+    if not isinstance(user_name, str):
+        return JSONResponse(status_code=400, content={"message": "Invalid user name"})
+    message = form['message']
+    if not isinstance(message, str):
+        return JSONResponse(status_code=400, content={"message": "Invalid message"})
+
+    _get_ai_chat_response(user_name, message, user_repo, llm, _gen_ai_reply_coaching)
+    user = user_repo.get(user_name)
+    chat_histories = user.chat_histories.find(last_n=10)
+    messages = [
+        ChatMessageView(type=chat.type, text=chat.text)
+        for chat in chat_histories
+    ]
+    return templates.TemplateResponse(name='index.html', context={"request": request, "user_name": user_name, "messages": messages})
 
 @app.post("/user/{user_name}/ai/chat/response", 
         response_model=ChatResponse, 
@@ -145,6 +196,22 @@ def _gen_ai_reply_advanced(chat_histories: list[ChatMessage], llm: LLM) -> str:
     system_content = f"make the repsponse suitable for a user with {sentiment} sentiment"
     chat_histories.append(
         SystemMessage(text=system_content, time=datetime.now())
+    )
+    result = llm.get_chat_completion(chat_histories)
+    return result
+
+def _gen_ai_reply_coaching(chat_histories: list[ChatMessage], llm: LLM) -> str:
+    system_prompt = """你是一个具有阿德勒哲学思想的心理咨询师。以下是你的一些核心观点：
+
+1. 我们的不幸都是自己的选择
+2. 一切烦恼都来自人际关系
+3. 让干涉你生活的人见鬼去
+4. 要有被讨厌的勇气
+5. 认真的人生活在当下
+
+请根据以上观点，运用苏格拉底式提问法与用户交谈，让用户自己找到答案。"""
+
+    chat_histories.insert(0, SystemMessage(text=system_prompt, time=datetime.now())
     )
     result = llm.get_chat_completion(chat_histories)
     return result
