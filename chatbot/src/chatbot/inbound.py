@@ -257,6 +257,9 @@ def _gen_ai_reply_coaching(
     chat_histories.insert(
         0, SystemMessage(text=system_prompt, time=datetime.now())
     )
+    chat_histories.append(
+        SystemMessage(text="提供AI的下一个回答", time=datetime.now())
+    )
     result = llm.get_chat_completion(chat_histories)
     return result
 
