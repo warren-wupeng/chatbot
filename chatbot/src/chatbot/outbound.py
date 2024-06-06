@@ -45,10 +45,14 @@ class MongoUserChatHistories(UserChatHistories):
             filters, sort=[("time", pymongo.DESCENDING)], limit=last_n
         ))
         chat_histories.reverse()
-        return [
+        
+        result = [
             ChatMessage(type=chat["type"], text=chat["text"], time=chat["time"])
             for chat in chat_histories
         ]
+        for r in result:
+            print(r)
+        return result
 
 class MongoUserRepo(UserRepo):
     
@@ -97,6 +101,13 @@ class LLM:
                 "messages": messages
             })
         )
+        if response.status_code != 200:
+            raise self.LLMException(
+                f"Failed to get response from LLM: {response.text}"
+                )
         res_json = response.json()
         result = res_json["choices"][0]["message"]["content"]
         return result
+    
+    class LLMException(Exception):
+        pass

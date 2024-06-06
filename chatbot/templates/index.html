@@ -13,15 +13,15 @@
     <ul>
         <li>回答你的问题</li>
         <li>提供信息</li>
-        <li>帮助你处理个人成长中的烦恼</li>
+        <li>使用CBT认知行为疗法帮助你处理个人成长中的烦恼</li>
     </ul>
     <p>有什么想我可以帮助你的吗?</p>
 
     <form action="/get-chat-history" method="post">
         <label for="user_name">你的名字:</label>
-        <input type="text" name="user_name" id="user_name" value="来访者">
+        <input type="text" name="user_name" id="user_name" value="{{ user_name }}">
         <br>
-        <input type="submit" value="获取聊天记录">
+        <input type="submit" value="开始聊天">
     </form>
     {% if messages %}
     {% for message in messages %}

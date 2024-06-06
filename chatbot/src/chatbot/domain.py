@@ -6,9 +6,10 @@ from typing import Literal, Optional
 
 
 class ChatMessage(BaseModel):
+    time: datetime
     type: Literal["user", "ai", "system"]
     text: str
-    time: datetime
+
 
 
 class UserMessage(ChatMessage):

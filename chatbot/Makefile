@@ -1,5 +1,5 @@
 up-local:
-	export $(shell cat envs/.env | grep -v '^#' | xargs ) && poetry run chatbot
+	export $(shell cat envs/local.env | grep -v '^#' | xargs ) && poetry run chatbot
 
 build:
 	docker-compose build
